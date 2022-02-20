@@ -18,9 +18,11 @@ const db = mysql.createConnection({
   database: 'joshgncd_riverbank',
 });
 
+var errors = ''; // for logging on the Get request
+
 db.connect(function(err) {
   if (err) {
-    console.log(err);
+    errors = err.message;
     return console.error('error: ' + err.message);
   }
   console.log('Connected to the MySQL server.');
@@ -120,7 +122,7 @@ app.post('/server/uploadtasks', (req, res) => {
 
 app.get('/server/', (req, res) => {
   console.log('server is working');
-  res.send('server is working');
+  res.send('server is working with errors: ' + errors);
 });
 
 app.listen(PORT, () => {
