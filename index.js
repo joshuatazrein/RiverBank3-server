@@ -24,8 +24,9 @@ db.connect(function(err) {
   if (err) {
     errors = err.message;
     return console.error('error: ' + err.message);
+  } else {
+    errors = 'Connected to the MySQL server.';
   }
-  console.log('Connected to the MySQL server.');
 });
 
 // login old user
