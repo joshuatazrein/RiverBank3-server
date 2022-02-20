@@ -136,14 +136,12 @@ app.get('/server/', (req, res) => {
   )
 });
 
-app.get('/server/fstest', (req, res) => {
-  fs.readdir(__dirname, (err, files) => {
-    if (err) {
-      res.send(err.message);
-    } else {
-      res.send(files);
-    }
-  })
+app.post('/server/largeposttest', (req, res) => {
+  try {
+    res.send({receivedData: req.body});
+  } catch(err) {
+    res.send(err);
+  }
 });
 
 app.post('/server/posttest', (req, res) => {
