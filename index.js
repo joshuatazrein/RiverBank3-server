@@ -54,7 +54,7 @@ app.post('/server/login', (req, res) => {
       }
     }
   );
-})
+});
 
 // create new user
 app.post('/server/createuser', (req, res) => {
@@ -125,6 +125,10 @@ app.get('/server/', (req, res) => {
   console.log('server is working');
   res.send('server is working with errors: ' + errors);
 });
+
+app.post('/server/posttest', (req, res) => {
+  res.send('post requests are working');
+})
 
 app.listen(PORT, () => {
   console.log('listening at ' + PORT);
