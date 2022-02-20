@@ -80,7 +80,7 @@ app.post('/server/createuser', (req, res) => {
         res.send({
           settings: resetData.resetData.settings,
           tasks: resetData.resetData.tasks,
-          encryptedPassword: encryptedPassword,
+          encryptedPassword: encryptedPassword.password,
         });
       }
     }
