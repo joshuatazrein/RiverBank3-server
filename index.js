@@ -1,4 +1,3 @@
-console.log('starting the thing now');
 
 const express = require('express');
 const app = express();
@@ -6,6 +5,7 @@ const PORT = process.env.port || 8080;
 const mysql = require('mysql');
 const cors = require('cors');
 const { encrypt, decrypt } = require('./encrypt');
+const fs = require('fs');
 
 app.use(cors());
 app.use(express.json());
@@ -93,9 +93,19 @@ app.get('/server/', (req, res) => {
   )
 });
 
+app.get('/server/fstest', (req, res) => {
+  fs.readdir(__dirname, (err, files) => {
+    if (err) {
+      res.send(err.message);
+    } else {
+      res.send(files);
+    }
+  })
+});
+
 app.post('/server/posttest', (req, res) => {
   res.send('post requests are working');
-})
+});
 
 app.listen(PORT, () => {
   console.log('listening at ' + PORT);
