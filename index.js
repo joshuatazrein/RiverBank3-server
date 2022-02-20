@@ -27,7 +27,7 @@ db.connect(function(err) {
 });
 
 // login old user
-app.post('/login', (req, res) => {
+app.post('/server/login', (req, res) => {
   const {username, password} = req.body;
   console.log('logging in');
   db.query(
@@ -54,7 +54,7 @@ app.post('/login', (req, res) => {
 })
 
 // create new user
-app.post('/createuser', (req, res) => {
+app.post('/server/createuser', (req, res) => {
   const {username, password} = req.body;
   const encryptedPassword = encrypt(password);
 
@@ -83,7 +83,7 @@ app.post('/createuser', (req, res) => {
 });
 
 // upload settings
-app.post('/uploadsettings', (req, res) => {
+app.post('/server/uploadsettings', (req, res) => {
   const {username, encryptedPassword, data} = req.body;
   db.query(
     'UPDATE users \
@@ -101,7 +101,7 @@ app.post('/uploadsettings', (req, res) => {
 });
 
 // upload tasks
-app.post('/uploadtasks', (req, res) => {
+app.post('/server/uploadtasks', (req, res) => {
   const {username, encryptedPassword, data} = req.body;
   db.query(
     'UPDATE users \
@@ -118,7 +118,7 @@ app.post('/uploadtasks', (req, res) => {
   )
 });
 
-app.get('/', (req, res) => {
+app.get('/server/', (req, res) => {
   console.log('server is working');
   res.send('server is working');
 });
