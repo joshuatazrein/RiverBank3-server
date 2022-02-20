@@ -6,6 +6,8 @@ const cors = require('cors');
 const {encrypt, decrypt} = require('./encrypt');
 const resetData = require('./resetData');
 
+console.log('starting the thing now');
+
 app.use(cors());
 app.use(express.json());
 
