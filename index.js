@@ -2,7 +2,7 @@ console.log('starting the thing now');
 
 const express = require('express');
 const app = express();
-const PORT = 3001;
+const PORT = process.env.port || 8080;
 const mysql = require('mysql');
 const cors = require('cors');
 const {encrypt, decrypt} = require('./encrypt');
@@ -116,6 +116,11 @@ app.post('/uploadtasks', (req, res) => {
       }
     }
   )
+});
+
+app.get('/', (req, res) => {
+  console.log('server is working');
+  res.send('server is working');
 });
 
 app.listen(PORT, () => {
