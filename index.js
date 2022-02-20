@@ -1,3 +1,5 @@
+console.log('starting the thing now');
+
 const express = require('express');
 const app = express();
 const PORT = 3001;
@@ -5,8 +7,6 @@ const mysql = require('mysql');
 const cors = require('cors');
 const {encrypt, decrypt} = require('./encrypt');
 const resetData = require('./resetData');
-
-console.log('starting the thing now');
 
 app.use(cors());
 app.use(express.json());
