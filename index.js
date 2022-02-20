@@ -5,7 +5,7 @@ const app = express();
 const PORT = process.env.port || 8080;
 const mysql = require('mysql');
 const cors = require('cors');
-const {encrypt, decrypt} = require('./encrypt');
+const { encrypt, decrypt } = require('./encrypt');
 const resetData = require('./resetData');
 
 app.use(cors());
@@ -20,7 +20,7 @@ const db = mysql.createConnection({
 
 var errors = ''; // for logging on the Get request
 
-db.connect(function(err) {
+db.connect(function (err) {
   if (err) {
     errors = err.message;
     return console.error('error: ' + err.message);
@@ -31,52 +31,54 @@ db.connect(function(err) {
 
 // login old user
 app.post('/server/login', (req, res) => {
-  const {username, password} = req.body;
-  console.log('logging in');
-  db.query(
-    'SELECT password, iv, settings, tasks from users WHERE username = ?',
-    [username],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        if (result[0] === undefined) {
-          res.send('wrong username');
-        } else if (decrypt(result[0]) === password) {
-          res.send({
-            settings: JSON.parse(result[0].settings),
-            tasks: JSON.parse(result[0].tasks),
-            encryptedPassword: result[0].password,
-          });
+  try {
+    const { username, password } = req.body;
+    db.query(
+      'SELECT password, iv, settings, tasks from users WHERE username = ?',
+      [username],
+      (err, result) => {
+        if (err) {
+          res.send(err.message);
         } else {
-          res.send('wrong password');
+          if (result[0] === undefined) {
+            res.send('wrong username');
+          } else if (decrypt(result[0]) === password) {
+            res.send({
+              settings: JSON.parse(result[0].settings),
+              tasks: JSON.parse(result[0].tasks),
+              encryptedPassword: result[0].password,
+            });
+          } else {
+            res.send('wrong password');
+          }
         }
       }
-    }
-  );
+    );
+  } catch (err) {
+    res.send(err.message);
+  }
 });
 
 // create new user
 app.post('/server/createuser', (req, res) => {
-  const {username, password} = req.body;
+  const { username, password } = req.body;
   const encryptedPassword = encrypt(password);
 
   db.query(
     'INSERT INTO users (username, password, iv, settings, tasks) VALUES (?, ?, ?, ?, ?)',
     [
-      username, 
-      encryptedPassword.password, 
-      encryptedPassword.iv, 
+      username,
+      encryptedPassword.password,
+      encryptedPassword.iv,
       '{}', // data will be initialized on load
       '{}',
     ],
     (err, result) => {
       if (err) {
-        console.log(err);
         res.send('duplicate username');
       } else {
         res.send({
-          settings: resetData.resetData.settings, 
+          settings: resetData.resetData.settings,
           tasks: resetData.resetData.tasks,
           encryptedPassword: encryptedPassword,
         });
@@ -87,7 +89,7 @@ app.post('/server/createuser', (req, res) => {
 
 // upload settings
 app.post('/server/uploadsettings', (req, res) => {
-  const {username, encryptedPassword, data} = req.body;
+  const { username, encryptedPassword, data } = req.body;
   db.query(
     'UPDATE users \
     SET settings = ? \
@@ -95,7 +97,7 @@ app.post('/server/uploadsettings', (req, res) => {
     [JSON.stringify(data), username, encryptedPassword],
     (err, result) => {
       if (err) {
-        console.log(err);
+        res.send(err.message);
       } else {
         res.send('Success');
       }
@@ -105,7 +107,7 @@ app.post('/server/uploadsettings', (req, res) => {
 
 // upload tasks
 app.post('/server/uploadtasks', (req, res) => {
-  const {username, encryptedPassword, data} = req.body;
+  const { username, encryptedPassword, data } = req.body;
   db.query(
     'UPDATE users \
     SET tasks = ? \
@@ -113,7 +115,7 @@ app.post('/server/uploadtasks', (req, res) => {
     [JSON.stringify(data), username, encryptedPassword],
     (err, result) => {
       if (err) {
-        console.log(err);
+        res.send(err.message);
       } else {
         res.send('Success');
       }
@@ -122,8 +124,16 @@ app.post('/server/uploadtasks', (req, res) => {
 });
 
 app.get('/server/', (req, res) => {
-  console.log('server is working');
-  res.send('server is working with errors: ' + errors);
+  db.query(
+    'SELECT * from users',
+    (err, result) => {
+      if (err) {
+        res.send(err.message);
+      } else {
+        res.send(result);
+      }
+    }
+  )
 });
 
 app.post('/server/posttest', (req, res) => {
