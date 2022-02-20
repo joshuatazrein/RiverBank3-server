@@ -6,7 +6,6 @@ const PORT = process.env.port || 8080;
 const mysql = require('mysql');
 const cors = require('cors');
 const { encrypt, decrypt } = require('./encrypt');
-const resetData = require('./resetData');
 
 app.use(cors());
 app.use(express.json());
@@ -34,7 +33,7 @@ app.post('/server/login', (req, res) => {
   try {
     const { username, password } = req.body;
     db.query(
-      'SELECT password, iv, settings, tasks from users WHERE username = ?',
+      'SELECT password, iv from users WHERE username = ?',
       [username],
       (err, result) => {
         if (err) {
@@ -44,8 +43,6 @@ app.post('/server/login', (req, res) => {
             res.send('wrong username');
           } else if (decrypt(result[0]) === password) {
             res.send({
-              settings: JSON.parse(result[0].settings),
-              tasks: JSON.parse(result[0].tasks),
               encryptedPassword: result[0].password,
             });
           } else {
@@ -65,59 +62,19 @@ app.post('/server/createuser', (req, res) => {
   const encryptedPassword = encrypt(password);
 
   db.query(
-    'INSERT INTO users (username, password, iv, settings, tasks) VALUES (?, ?, ?, ?, ?)',
+    'INSERT INTO users (username, password, iv) VALUES (?, ?, ?)',
     [
       username,
       encryptedPassword.password,
-      encryptedPassword.iv,
-      '{}', // data will be initialized on load
-      '{}',
+      encryptedPassword.iv
     ],
     (err, result) => {
       if (err) {
         res.send('duplicate username');
       } else {
         res.send({
-          settings: resetData.resetData.settings,
-          tasks: resetData.resetData.tasks,
           encryptedPassword: encryptedPassword.password,
         });
-      }
-    }
-  )
-});
-
-// upload settings
-app.post('/server/uploadsettings', (req, res) => {
-  const { username, encryptedPassword, data } = req.body;
-  db.query(
-    'UPDATE users \
-    SET settings = ? \
-    WHERE username = ? AND password = ?',
-    [JSON.stringify(data), username, encryptedPassword],
-    (err, result) => {
-      if (err) {
-        res.send(err.message);
-      } else {
-        res.send('Success');
-      }
-    }
-  )
-});
-
-// upload tasks
-app.post('/server/uploadtasks', (req, res) => {
-  const { username, encryptedPassword, data } = req.body;
-  db.query(
-    'UPDATE users \
-    SET tasks = ? \
-    WHERE username = ? AND password = ?',
-    [JSON.stringify(data), username, encryptedPassword],
-    (err, result) => {
-      if (err) {
-        res.send(err.message);
-      } else {
-        res.send('Success');
       }
     }
   )
