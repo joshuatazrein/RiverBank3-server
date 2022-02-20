@@ -1,4 +1,3 @@
-console.log('starting the thing now');
 
 const express = require('express');
 const app = express();
@@ -6,6 +5,7 @@ const PORT = process.env.port || 8080;
 const mysql = require('mysql');
 const cors = require('cors');
 const { encrypt, decrypt } = require('./encrypt');
+const fs = require('fs');
 const resetData = require('./resetData');
 
 app.use(cors());
@@ -136,9 +136,17 @@ app.get('/server/', (req, res) => {
   )
 });
 
+app.post('/server/largeposttest', (req, res) => {
+  try {
+    res.send({receivedData: req.body});
+  } catch(err) {
+    res.send(err);
+  }
+});
+
 app.post('/server/posttest', (req, res) => {
   res.send('post requests are working');
-})
+});
 
 app.listen(PORT, () => {
   console.log('listening at ' + PORT);
