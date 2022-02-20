@@ -9,19 +9,14 @@ const resetData = require('./resetData');
 app.use(cors());
 app.use(express.json());
 
-const db = mysql.createConnection({
-  user: 'root',
-  host: 'localhost',
-  password: '',
-  database: 'RiverBank',
-});
+// const db = mysql.createConnection({
+//   user: 'root',
+//   host: 'localhost',
+//   password: '',
+//   database: 'RiverBank',
+// });
 
-db.connect(function(err) {
-  if (err) {
-    return console.error('error: ' + err.message);
-  }
-  console.log('Connected to the MySQL server.');
-});
+const db = [];
 
 // login old user
 app.post('/login', (req, res) => {
