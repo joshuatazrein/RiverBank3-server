@@ -137,7 +137,7 @@ app.get('/server/', (req, res) => {
 });
 
 app.post('/server/posttest', (req, res) => {
-  res.send('post requests are working');
+  res.send(['post requests are working', req.body]);
 })
 
 app.listen(PORT, () => {
