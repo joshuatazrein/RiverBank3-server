@@ -37,9 +37,9 @@ db.connect(function (err) {
   }
 });
 
-db.query(
-  'SET binlog_row_value_options = PARTIAL_JSON, binlog_row_image = MINIMAL'
-);
+// db.query(
+//   'SET binlog_row_value_options = PARTIAL_JSON, binlog_row_image = MINIMAL'
+// );
 
 // login old user
 app.post('/server/login', (req, res) => {
