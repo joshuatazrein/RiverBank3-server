@@ -42,6 +42,7 @@ function uploadTasksFile(username, password, data) {
 
 module.exports = {
   readFile, 
+  writeFile,
   updateTaskDataFile, 
   removeTaskDataFile, 
   uploadSettingsFile,

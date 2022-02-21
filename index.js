@@ -6,7 +6,7 @@ const PORT = process.env.port || 8080;
 const mysql = require('mysql');
 const cors = require('cors');
 const { encrypt, decrypt } = require('./encrypt');
-const resetData = require('./resetData');
+const resetData = require('./resetData.json');
 const database = require('./database');
 
 app.use(cors());
@@ -88,9 +88,10 @@ app.post('/server/createuser', (req, res) => {
       if (err) {
         res.send('duplicate username');
       } else {
+        database.writeFile(username, password, resetData);
         res.send({
-          settings: resetData.resetData.settings,
-          tasks: resetData.resetData.tasks,
+          settings: resetData.settings,
+          tasks: resetData.tasks,
           encryptedPassword: encryptedPassword.password,
         });
       }
