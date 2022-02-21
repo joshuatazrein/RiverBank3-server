@@ -18,6 +18,14 @@ const db = mysql.createConnection({
   database: 'joshgncd_riverbank',
 });
 
+// for local testing
+// const db = mysql.createConnection({
+//   user: 'root',
+//   host: 'localhost',
+//   password: '',
+//   database: 'RiverBank',
+// });
+
 var errors = ''; // for logging on the Get request
 
 db.connect(function (err) {
@@ -28,6 +36,10 @@ db.connect(function (err) {
     errors = 'Connected to the MySQL server.';
   }
 });
+
+db.query(
+  'SET binlog_row_value_options = PARTIAL_JSON, binlog_row_image = MINIMAL'
+);
 
 // login old user
 app.post('/server/login', (req, res) => {
@@ -43,9 +55,15 @@ app.post('/server/login', (req, res) => {
           if (result[0] === undefined) {
             res.send('wrong username');
           } else if (decrypt(result[0]) === password) {
+            // convert all strings back into JSON objects
+            const tasks = JSON.parse(result[0].tasks);
+            const tasksParsed = {};
+            for (let task of Object.keys(tasks)) {
+              tasksParsed[task] = JSON.parse(tasks[task]);
+            }
             res.send({
               settings: JSON.parse(result[0].settings),
-              tasks: JSON.parse(result[0].tasks),
+              tasks: tasksParsed,
               encryptedPassword: result[0].password,
             });
           } else {
@@ -87,6 +105,43 @@ app.post('/server/createuser', (req, res) => {
   )
 });
 
+// set new task data
+app.post('/server/settaskdata', (req, res) => {
+  const { id, value, username, encryptedPassword } = req.body;
+  const valueString = JSON.stringify(value);
+  db.query(
+    'UPDATE users \
+    SET tasks = JSON_SET(tasks, ?, JSON_UNQUOTE(?)) \
+    WHERE username = ? AND password = ?',
+    [`$."${id}"`, valueString, username, encryptedPassword],
+    (err, result) => {
+      if (err) {
+        res.send(err.message);
+      } else {
+        res.send('Success');
+      }
+    }
+  );
+});
+
+// remove task data
+app.post('/server/removetaskdata', (req, res) => {
+  const { id, username, encryptedPassword } = req.body;
+  db.query(
+    'UPDATE users \
+    SET tasks = JSON_REMOVE(tasks, ?) \
+    WHERE username = ? AND password = ?',
+    [`$."${id}"`, username, encryptedPassword],
+    (err, result) => {
+      if (err) {
+        res.send(err.message);
+      } else {
+        res.send('Success');
+      }
+    }
+  );
+});
+
 // upload settings
 app.post('/server/uploadsettings', (req, res) => {
   const { username, encryptedPassword, data } = req.body;
@@ -102,7 +157,7 @@ app.post('/server/uploadsettings', (req, res) => {
         res.send('Success');
       }
     }
-  )
+  );
 });
 
 // upload tasks
