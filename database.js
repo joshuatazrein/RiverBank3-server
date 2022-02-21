@@ -25,18 +25,18 @@ function removeTaskDataFile(username, password, id) {
   writeFile(username, password, data);
 }
 
-function uploadSettingsFile(username, password, data) {
+function uploadSettingsFile(username, password, settings) {
   // update the settings of a JSON file
-  const fullData = readFile(username, password);
-  fullData.settings = data;
+  const data = readFile(username, password);
+  data.settings = settings;
   writeFile(username, password, data);
   
 }
 
-function uploadTasksFile(username, password, data) {
+function uploadTasksFile(username, password, tasks) {
   // update the tasks of a JSON file
-  const fullData = readFile(username, password);
-  fullData.tasks = data;
+  const data = readFile(username, password);
+  data.tasks = tasks;
   writeFile(username, password, data);
 }
 
