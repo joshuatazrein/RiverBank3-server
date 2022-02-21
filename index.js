@@ -91,8 +91,8 @@ app.post('/server/createuser', (req, res) => {
         // write new file to data/<username><encryptedPassword>.json
         database.writeFile(username, encryptedPassword.password, resetData);
         res.send({
-          settings: resetData.settings,
-          tasks: resetData.tasks,
+          settings: {},
+          tasks: {},
           encryptedPassword: encryptedPassword.password,
         });
       }
