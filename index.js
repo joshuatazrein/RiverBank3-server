@@ -87,11 +87,12 @@ app.post('/server/createuser', (req, res) => {
       if (err) {
         res.send('duplicate username');
       } else {
+
         // write new file to data/<username><encryptedPassword>.json
-        database.writeFile(username, encryptedPassword.password, resetData);
+        database.writeFile(username, encryptedPassword.password, {});
+
+        // client-size initializes data, just send password
         res.send({
-          settings: {},
-          tasks: {},
           encryptedPassword: encryptedPassword.password,
         });
       }
