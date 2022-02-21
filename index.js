@@ -32,7 +32,6 @@ var errors = ''; // for logging on the Get request
 db.connect(function (err) {
   if (err) {
     errors = err.message;
-    return console.error('error: ' + err.message);
   } else {
     errors = 'Connected to the MySQL server.';
   }
@@ -47,7 +46,7 @@ app.post('/server/login', (req, res) => {
       [username],
       (err, result) => {
         if (err) {
-          res.send(err.message);
+          res.send(err);
         } else {
           if (result[0] === undefined) {
             res.send('wrong username');
@@ -69,7 +68,7 @@ app.post('/server/login', (req, res) => {
       }
     );
   } catch (err) {
-    res.send(err.message);
+    res.send(err);
   }
 });
 
@@ -107,7 +106,7 @@ app.post('/server/settaskdata', (req, res) => {
     database.updateTaskDataFile(username, encryptedPassword, id, value);
     res.send('success');
   } catch (err) {
-    res.send(err.message);
+    res.send(err);
   }
 });
 
@@ -118,7 +117,7 @@ app.post('/server/removetaskdata', (req, res) => {
     database.removeTaskDataFile(username, encryptedPassword, id, value);
     res.send('success');
   } catch (err) {
-    res.send(err.message);
+    res.send(err);
   }
 });
 
@@ -129,7 +128,7 @@ app.post('/server/uploadsettings', (req, res) => {
     database.uploadSettingsFile(username, encryptedPassword, data);
     res.send('success');
   } catch (err) {
-    res.send(err.message)
+    res.send(err)
   }
 });
 
@@ -140,7 +139,7 @@ app.post('/server/uploadtasks', (req, res) => {
     database.uploadTasksFile(username, encryptedPassword, data);
     res.send('success');
   } catch (err) {
-    res.send(err.message)
+    res.send(err)
   }
 });
 
@@ -149,7 +148,7 @@ app.get('/server/', (req, res) => {
     'SELECT * from users',
     (err, result) => {
       if (err) {
-        res.send(err.message);
+        res.send(err);
       } else {
         res.send(result);
       }
