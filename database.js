@@ -30,7 +30,6 @@ function uploadSettingsFile(username, password, settings) {
   const data = readFile(username, password);
   data.settings = settings;
   writeFile(username, password, data);
-  
 }
 
 function uploadTasksFile(username, password, tasks) {
