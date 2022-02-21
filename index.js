@@ -7,6 +7,7 @@ const mysql = require('mysql');
 const cors = require('cors');
 const { encrypt, decrypt } = require('./encrypt');
 const resetData = require('./resetData');
+const database = require('./database');
 
 app.use(cors());
 app.use(express.json());
@@ -37,16 +38,12 @@ db.connect(function (err) {
   }
 });
 
-// db.query(
-//   'SET binlog_row_value_options = PARTIAL_JSON, binlog_row_image = MINIMAL'
-// );
-
 // login old user
 app.post('/server/login', (req, res) => {
   try {
     const { username, password } = req.body;
     db.query(
-      'SELECT password, iv, settings, tasks from users WHERE username = ?',
+      'SELECT password, iv from users WHERE username = ?',
       [username],
       (err, result) => {
         if (err) {
@@ -55,16 +52,15 @@ app.post('/server/login', (req, res) => {
           if (result[0] === undefined) {
             res.send('wrong username');
           } else if (decrypt(result[0]) === password) {
-            // convert all strings back into JSON objects
-            const tasks = JSON.parse(result[0].tasks);
-            const tasksParsed = {};
-            for (let task of Object.keys(tasks)) {
-              tasksParsed[task] = JSON.parse(tasks[task]);
-            }
+            // read file from JSON
+            const encryptedPassword = result[0].password;
+            const data = database.readFile(
+              username, encryptedPassword
+            );
             res.send({
-              settings: JSON.parse(result[0].settings),
-              tasks: tasksParsed,
-              encryptedPassword: result[0].password,
+              settings: data.settings,
+              tasks: data.tasks,
+              encryptedPassword: encryptedPassword,
             });
           } else {
             res.send('wrong password');
@@ -83,13 +79,11 @@ app.post('/server/createuser', (req, res) => {
   const encryptedPassword = encrypt(password);
 
   db.query(
-    'INSERT INTO users (username, password, iv, settings, tasks) VALUES (?, ?, ?, ?, ?)',
+    'INSERT INTO users (username, password, iv) VALUES (?, ?, ?)',
     [
       username,
       encryptedPassword.password,
-      encryptedPassword.iv,
-      '{}', // data will be initialized on load
-      '{}',
+      encryptedPassword.iv
     ],
     (err, result) => {
       if (err) {
@@ -109,73 +103,45 @@ app.post('/server/createuser', (req, res) => {
 app.post('/server/settaskdata', (req, res) => {
   const { id, value, username, encryptedPassword } = req.body;
   const valueString = JSON.stringify(value);
-  db.query(
-    'UPDATE users \
-    SET tasks = JSON_SET(tasks, ?, JSON_UNQUOTE(?)) \
-    WHERE username = ? AND password = ?',
-    [`$."${id}"`, valueString, username, encryptedPassword],
-    (err, result) => {
-      if (err) {
-        res.send(err.message);
-      } else {
-        res.send('Success');
-      }
-    }
-  );
+  try {
+    database.updateTaskDataFile(username, encryptedPassword, id, value);
+    res.send('success');
+  } catch (err) {
+    res.send(err.message);
+  }
 });
 
 // remove task data
 app.post('/server/removetaskdata', (req, res) => {
   const { id, username, encryptedPassword } = req.body;
-  db.query(
-    'UPDATE users \
-    SET tasks = JSON_REMOVE(tasks, ?) \
-    WHERE username = ? AND password = ?',
-    [`$."${id}"`, username, encryptedPassword],
-    (err, result) => {
-      if (err) {
-        res.send(err.message);
-      } else {
-        res.send('Success');
-      }
-    }
-  );
+  try {
+    database.removeTaskDataFile(username, encryptedPassword, id, value);
+    res.send('success');
+  } catch (err) {
+    res.send(err.message);
+  }
 });
 
 // upload settings
 app.post('/server/uploadsettings', (req, res) => {
   const { username, encryptedPassword, data } = req.body;
-  db.query(
-    'UPDATE users \
-    SET settings = ? \
-    WHERE username = ? AND password = ?',
-    [JSON.stringify(data), username, encryptedPassword],
-    (err, result) => {
-      if (err) {
-        res.send(err.message);
-      } else {
-        res.send('Success');
-      }
-    }
-  );
+  try {
+    database.uploadSettingsFile(username, encryptedPassword, data);
+    res.send('success');
+  } catch (err) {
+    res.send(err.message)
+  }
 });
 
 // upload tasks
 app.post('/server/uploadtasks', (req, res) => {
   const { username, encryptedPassword, data } = req.body;
-  db.query(
-    'UPDATE users \
-    SET tasks = ? \
-    WHERE username = ? AND password = ?',
-    [JSON.stringify(data), username, encryptedPassword],
-    (err, result) => {
-      if (err) {
-        res.send(err.message);
-      } else {
-        res.send('Success');
-      }
-    }
-  )
+  try {
+    database.uploadTasksFile(username, encryptedPassword, data);
+    res.send('success');
+  } catch (err) {
+    res.send(err.message)
+  }
 });
 
 app.get('/server/', (req, res) => {
