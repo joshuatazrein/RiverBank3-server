@@ -6,7 +6,6 @@ const PORT = process.env.port || 8080;
 const mysql = require('mysql');
 const cors = require('cors');
 const { encrypt, decrypt } = require('./encrypt');
-const resetData = require('./resetData.json');
 const database = require('./database');
 
 app.use(cors());
