@@ -71,6 +71,21 @@ app.post('/server/login', (req, res) => {
   }
 });
 
+app.post('/server/getdata', (req, res) => {
+  try {
+    const { username, password } = req.body;
+    // read file from JSON
+    const data = database.readFile(
+      username, password
+    );
+    res.send({
+      data: data,
+    });
+  } catch (err) {
+    res.send(err);
+  }
+});
+
 // create new user
 app.post('/server/createuser', (req, res) => {
   const { username, password } = req.body;
